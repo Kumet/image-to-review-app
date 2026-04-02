@@ -74,9 +74,54 @@ body {
   gap: 1rem;
 }
 
+.drop-zone {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1.5rem;
+  border: 2px dashed #93c5fd;
+  border-radius: 16px;
+  background: #eff6ff;
+  color: #1e3a8a;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
+}
+
+.drop-zone.is-dragover,
+.drop-zone:hover,
+.drop-zone:focus-visible {
+  border-color: #2563eb;
+  background: #dbeafe;
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.drop-zone__title,
+.drop-zone__text,
+.drop-zone__hint {
+  margin: 0;
+}
+
+.drop-zone__title {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.drop-zone__hint {
+  color: #1d4ed8;
+  font-size: 0.95rem;
+}
+
 .upload-form__row {
   display: grid;
   gap: 0.5rem;
+}
+
+.upload-form__row input[type="file"] {
+  padding: 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  background: #ffffff;
 }
 
 .file-input-label {
@@ -102,6 +147,75 @@ body {
 .selection-summary,
 .empty-area {
   color: #6b7280;
+}
+
+.selection-summary {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+#selected-count {
+  font-weight: 700;
+  color: #1f2937;
+}
+
+#selection-helper {
+  font-size: 0.95rem;
+}
+
+.thumbnail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+}
+
+.thumbnail-card {
+  border: 1px solid #dbeafe;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.thumbnail-card__image {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: #e5e7eb;
+}
+
+.thumbnail-card__body {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.75rem;
+}
+
+.thumbnail-card__name,
+.thumbnail-card__meta {
+  margin: 0;
+}
+
+.thumbnail-card__name {
+  font-weight: 700;
+  color: #111827;
+  word-break: break-word;
+}
+
+.thumbnail-card__meta {
+  color: #6b7280;
+  font-size: 0.92rem;
+}
+
+.thumbnail-card__remove {
+  width: fit-content;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #374151;
+  padding: 0.35rem 0.7rem;
+  cursor: pointer;
 }
 
 .selected-files {

@@ -5,6 +5,19 @@
   hx-swap="innerHTML"
   hx-encoding="multipart/form-data"
 >
+  <div
+    id="drop-zone"
+    class="drop-zone"
+    tabindex="0"
+    role="button"
+    aria-controls="images"
+    aria-label="画像をドラッグアンドドロップ、またはクリックして選択"
+  >
+    <p class="drop-zone__title">画像をドラッグ＆ドロップ</p>
+    <p class="drop-zone__text">またはクリックして複数画像を選択してください</p>
+    <p class="drop-zone__hint">選択した画像はまとめて 1 件として解析します。</p>
+  </div>
+
   <div class="upload-form__row">
     <label class="file-input-label" for="images">画像ファイル</label>
     <input
@@ -23,8 +36,10 @@
   </p>
 
   <div class="selection-summary">
-    <span id="selected-count">0 件選択</span>
+    <span id="selected-count">0 枚選択</span>
+    <span id="selection-helper">画像セットをまとめて 1 件として解析します</span>
   </div>
+  <div id="thumbnail-list" class="thumbnail-grid" aria-live="polite"></div>
   <ul id="selected-files" class="selected-files"></ul>
 
   <button class="primary-button" type="submit">アップロードして解析</button>

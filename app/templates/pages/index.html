@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="panel hero-panel">
+  <h2>複数画像アップロード</h2>
+  <p>
+    複数画像をアップロードすると、サーバー側でダミー解析を実行し、
+    HTMX により結果領域だけを更新します。
+  </p>
+</section>
+
+<section class="panel">
+  {% include "partials/upload_form.html" %}
+  <div id="loading" class="loading-indicator htmx-indicator">アップロード中です。しばらくお待ちください。</div>
+</section>
+
+<section class="panel">
+  <h3>エラー</h3>
+  <div id="error-area" class="empty-area">現在エラーはありません。</div>
+</section>
+
+<section class="panel">
+  <h3>結果</h3>
+  <div id="result-area" class="empty-area">まだ解析結果はありません。</div>
+</section>
+{% endblock %}

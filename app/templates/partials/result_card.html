@@ -1,0 +1,31 @@
+<article class="result-card">
+  <img
+    class="result-card__image"
+    src="{{ item.preview_url }}"
+    alt="{{ item.original_filename }}"
+    loading="lazy"
+  >
+  <div class="result-card__body">
+    <h4>{{ item.original_filename }}</h4>
+    <p class="badge">{{ item.dummy_label }}</p>
+    <dl class="meta-list">
+      <div>
+        <dt>スコア</dt>
+        <dd>{{ item.score }} 点</dd>
+      </div>
+      <div>
+        <dt>サイズ</dt>
+        <dd>{{ item.size_kb }}</dd>
+      </div>
+      <div>
+        <dt>画像寸法</dt>
+        <dd>{{ item.dimensions }}</dd>
+      </div>
+      <div>
+        <dt>MIME</dt>
+        <dd>{{ item.content_type }}</dd>
+      </div>
+    </dl>
+    <p class="comment">{{ item.comment }}</p>
+  </div>
+</article>

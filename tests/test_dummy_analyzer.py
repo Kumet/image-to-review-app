@@ -1,0 +1,29 @@
+from __future__ import annotations
+
+from app.schemas.upload import UploadedImageInfo, UploadJob
+from app.services.dummy_analyzer import DummyAnalyzer
+from app.utils.time import utc_now
+
+
+def test_dummy_analyzer_returns_structured_and_stable_result() -> None:
+    uploaded = UploadedImageInfo(
+        original_filename="sample.png",
+        stored_filename="stored.png",
+        relative_path="uploads/job-1/stored.png",
+        content_type="image/png",
+        size_bytes=1024,
+        width=100,
+        height=80,
+    )
+    job = UploadJob(job_id="job-1", uploaded_at=utc_now(), file_count=1, files=[uploaded])
+    analyzer = DummyAnalyzer()
+
+    first = analyzer.analyze(job)
+    second = analyzer.analyze(job)
+
+    assert first.model_dump() == second.model_dump()
+    assert first.job_id == "job-1"
+    assert len(first.item_results) == 1
+    assert first.item_results[0].filename == "stored.png"
+    assert 60.0 <= first.item_results[0].score <= 100.0
+    assert first.item_results[0].comment

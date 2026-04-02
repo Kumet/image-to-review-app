@@ -1,0 +1,1000 @@
+# FastAPI + HTMX 複数画像アップロードアプリ 設計書
+
+作成日: 2026-04-02
+文書版: 1.0
+
+==================================================
+1. 目的
+==================================================
+
+本設計書は、FastAPI + HTMX を用いて、複数の写真をアップロードし、
+サーバー側でダミー解析を実行し、その結果を画面に返す Web アプリケーションの
+設計方針、構成、責務分離、非機能要件、ディレクトリ構成、開発ルール、
+将来拡張方針を定義するものである。
+
+現時点では返却内容は未確定であるため、解析処理はダミー実装とする。
+ただし、将来的に OCR、画像分類、画像要約、レビュー生成、外部 AI 連携へ
+安全に差し替えられる構造を前提とする。
+
+==================================================
+2. システム概要
+==================================================
+
+ユーザーはブラウザ上から複数画像をアップロードする。
+FastAPI は multipart/form-data で画像群を受け取り、サーバー上に保存する。
+保存後、ダミー解析サービスが画像ごとの簡易結果と全体サマリを生成する。
+その結果を HTML partial として返却し、HTMX がページの一部を更新する。
+
+基本方針:
+- サーバーサイドレンダリング中心
+- HTMX による部分更新
+- JavaScript は最小限
+- 画像保存と解析処理の責務を分離
+- 将来の AI 化を見据えた疎結合設計
+- 初期段階ではローカルファイル保存
+- 初期段階では DB 未使用でも成立
+- job_id 単位で処理を管理し、将来の DB 導入に備える
+
+==================================================
+3. ゴールと非ゴール
+==================================================
+
+3.1 ゴール
+- 複数画像をアップロードできること
+- アップロード直後に結果を画面へ反映できること
+- 返却内容はダミーでも構造化されていること
+- UI と処理ロジックが分離されていること
+- 後から AI 処理へ差し替えやすいこと
+- テストしやすい構造であること
+- ローカル開発しやすいこと
+- 将来的に S3 / DB / 非同期ワーカーへ拡張しやすいこと
+
+3.2 非ゴール
+- 初期版で本格的な AI 解析を実装すること
+- 初期版で認証・課金・マルチテナントを実装すること
+- 初期版で大規模分散処理を実装すること
+- 初期版で本番向け監視基盤をフル実装すること
+
+==================================================
+4. ユースケース
+==================================================
+
+4.1 基本ユースケース
+1. ユーザーがトップページへアクセスする
+2. ユーザーが複数画像を選択する
+3. ユーザーがアップロードボタンを押す
+4. HTMX が multipart/form-data で POST する
+5. FastAPI がファイルを検証し保存する
+6. ダミー解析を実行する
+7. 解析結果を HTML partial として返却する
+8. HTMX が結果表示領域を書き換える
+
+4.2 例外ユースケース
+- 画像が 0 件
+- 拡張子が不正
+- ファイル数上限超過
+- 画像サイズ上限超過
+- 保存失敗
+- ダミー解析失敗
+- 想定外例外
+
+==================================================
+5. 技術スタック
+==================================================
+
+5.1 バックエンド
+- Python 3.12 以上
+- FastAPI
+- Uvicorn
+- Jinja2
+- python-multipart
+- Pydantic v2
+- pydantic-settings
+- Pillow
+
+5.2 フロントエンド
+- HTML
+- CSS
+- HTMX
+- 必要最小限の JavaScript
+
+5.3 開発支援
+- pytest
+- httpx
+- ruff
+- mypy
+- pre-commit
+
+5.4 将来拡張候補
+- PostgreSQL
+- SQLAlchemy or SQLModel
+- Redis
+- Dramatiq / Celery / RQ
+- S3 / Cloudflare R2
+- OCR / Vision API / LLM
+
+==================================================
+6. 採用理由
+==================================================
+
+6.1 FastAPI
+- 型ヒントベースで実装しやすい
+- ファイルアップロード API を構築しやすい
+- Jinja2 テンプレート併用が容易
+- テストしやすい
+- 将来 API と SSR の両立がしやすい
+
+6.2 HTMX
+- 部分更新が簡潔
+- 小規模アプリで過剰な SPA 化を避けられる
+- ファイルアップロードも相性が良い
+- 初期実装の速度が高い
+
+6.3 Jinja2
+- サーバー側で HTML partial を返しやすい
+- HTMX と相性がよい
+- UI を Python 側データ構造と自然に結びつけられる
+
+6.4 Pillow
+- 画像のサイズ確認
+- フォーマット確認
+- 将来の簡易前処理に使える
+
+==================================================
+7. 全体アーキテクチャ
+==================================================
+
+構成概要:
+
+[Browser]
+   |
+   | GET /
+   v
+[FastAPI Pages Router] ----> [Jinja2 Templates]
+   |
+   | POST /uploads (HTMX multipart/form-data)
+   v
+[Uploads Router]
+   |
+   +--> [Validation]
+   |
+   +--> [File Service]
+   |       |
+   |       +--> save to local storage
+   |
+   +--> [Dummy Analyzer Service]
+   |
+   +--> [Result Service]
+   |
+   +--> return HTML partial
+   v
+[Browser HTMX partial swap]
+
+将来拡張:
+
+[Uploads Router]
+   |
+   +--> [Job Record]
+   +--> [Async Queue]
+   +--> [OCR / Vision / LLM]
+   +--> [DB]
+   +--> [Object Storage]
+
+==================================================
+8. ディレクトリ構成
+==================================================
+
+推奨ディレクトリ構成:
+
+project-root/
+├─ app/
+│  ├─ main.py
+│  ├─ core/
+│  │  ├─ config.py
+│  │  ├─ logging.py
+│  │  ├─ constants.py
+│  │  └─ exceptions.py
+│  ├─ routes/
+│  │  ├─ pages.py
+│  │  ├─ uploads.py
+│  │  └─ health.py
+│  ├─ services/
+│  │  ├─ file_service.py
+│  │  ├─ dummy_analyzer.py
+│  │  ├─ result_service.py
+│  │  └─ upload_service.py
+│  ├─ schemas/
+│  │  ├─ upload.py
+│  │  ├─ result.py
+│  │  └─ common.py
+│  ├─ models/
+│  │  └─ job.py
+│  ├─ templates/
+│  │  ├─ base.html
+│  │  ├─ pages/
+│  │  │  └─ index.html
+│  │  └─ partials/
+│  │     ├─ upload_form.html
+│  │     ├─ upload_result.html
+│  │     ├─ image_list.html
+│  │     ├─ result_card.html
+│  │     └─ error_message.html
+│  ├─ static/
+│  │  ├─ css/
+│  │  │  └─ app.css
+│  │  ├─ js/
+│  │  │  └─ app.js
+│  │  └─ uploads/
+│  └─ utils/
+│     ├─ filenames.py
+│     ├─ image_checks.py
+│     ├─ time.py
+│     └─ ids.py
+├─ tests/
+│  ├─ conftest.py
+│  ├─ test_pages.py
+│  ├─ test_uploads.py
+│  ├─ test_file_service.py
+│  └─ test_dummy_analyzer.py
+├─ scripts/
+│  ├─ dev.sh
+│  └─ lint.sh
+├─ .env
+├─ .env.example
+├─ pyproject.toml
+├─ README.md
+└─ Dockerfile
+
+==================================================
+9. 各ディレクトリの責務
+==================================================
+
+9.1 app/main.py
+責務:
+- FastAPI アプリの生成
+- ルーター登録
+- static mount
+- lifespan 管理
+- 共通ミドルウェア登録
+
+禁止事項:
+- ビジネスロジックを直接書かない
+- 画像保存処理を書かない
+- テンプレート組み立て処理を多く持たない
+
+9.2 app/core
+責務:
+- 設定
+- ログ設定
+- 定数
+- 例外定義
+
+9.3 app/routes
+責務:
+- HTTP リクエストの入口
+- リクエスト受理
+- サービス呼び出し
+- テンプレート返却 / partial 返却
+- HTTP ステータス決定
+
+禁止事項:
+- 画像保存ロジック
+- 解析ロジック
+- 複雑な整形ロジック
+
+9.4 app/services
+責務:
+- ビジネスロジック本体
+- ファイル処理
+- ダミー解析
+- 表示用データの組み立て
+
+9.5 app/schemas
+責務:
+- Pydantic による入出力型定義
+- 内部データ構造の整備
+
+9.6 app/templates
+責務:
+- 画面表示テンプレート
+- partial の分離
+- 表示に特化
+
+9.7 app/static
+責務:
+- CSS / JS / 保存済みアップロードの配信
+
+9.8 tests
+責務:
+- 回帰防止
+- バリデーション確認
+- partial レンダリング確認
+- サービス単体試験
+
+==================================================
+10. ルーティング設計
+==================================================
+
+10.1 GET /
+用途:
+- トップページ表示
+
+返却:
+- pages/index.html
+
+10.2 POST /uploads
+用途:
+- 複数画像アップロード
+- バリデーション
+- 保存
+- ダミー解析
+- 結果 partial 返却
+
+入力:
+- images: list[UploadFile]
+
+返却:
+- 正常時: partials/upload_result.html
+- 異常時: partials/error_message.html または適切なレスポンス
+
+10.3 GET /health
+用途:
+- ヘルスチェック
+
+返却:
+- JSON {"status": "ok"}
+
+10.4 将来追加候補
+- GET /jobs/{job_id}
+- GET /uploads/{job_id}
+- POST /jobs/{job_id}/reanalyze
+- DELETE /uploads/{job_id}
+- GET /api/results/{job_id}
+
+==================================================
+11. テンプレート設計
+==================================================
+
+11.1 base.html
+- 共通レイアウト
+- CSS / HTMX / JS 読み込み
+- ヘッダー
+- メインコンテナ
+
+11.2 pages/index.html
+- フォーム表示
+- 結果表示領域
+- エラー表示領域
+
+11.3 partials/upload_form.html
+- hx-post
+- hx-target
+- hx-swap
+- hx-encoding="multipart/form-data"
+- multiple input
+
+11.4 partials/upload_result.html
+- job_id
+- 全体サマリ
+- 画像一覧
+- 各画像のダミー結果カード
+
+11.5 partials/result_card.html
+- 画像ごとの表示
+- ファイル名
+- 画像プレビュー
+- スコア
+- コメント
+- ダミーラベル
+
+11.6 partials/error_message.html
+- エラーメッセージ表示
+- ユーザー向け短文
+- 開発向け詳細はログにのみ出力
+
+==================================================
+12. 入出力データ設計
+==================================================
+
+12.1 アップロード入力
+- images: 複数ファイル
+
+12.2 内部データモデル例
+
+UploadJob:
+- job_id: str
+- uploaded_at: datetime
+- file_count: int
+- files: list[UploadedImageInfo]
+
+UploadedImageInfo:
+- original_filename: str
+- stored_filename: str
+- relative_path: str
+- content_type: str
+- size_bytes: int
+- width: int | None
+- height: int | None
+
+DummyItemResult:
+- filename: str
+- dummy_label: str
+- score: float
+- comment: str
+
+DummyAnalysisResult:
+- job_id: str
+- summary: str
+- item_results: list[DummyItemResult]
+
+12.3 将来 AI 差し替えを見据えた拡張項目
+- tags: list[str]
+- extracted_text: str | None
+- confidence: float | None
+- warnings: list[str]
+- category: str | None
+
+==================================================
+13. バリデーション設計
+==================================================
+
+13.1 ファイル数制限
+- 0 件はエラー
+- 最大件数を環境変数で制御
+- 例: MAX_UPLOAD_FILES=10
+
+13.2 拡張子制限
+許可例:
+- .jpg
+- .jpeg
+- .png
+- .webp
+
+13.3 MIME タイプ制限
+許可例:
+- image/jpeg
+- image/png
+- image/webp
+
+13.4 サイズ制限
+- 1 ファイルごとの最大サイズ
+- リクエスト全体サイズも将来考慮
+
+13.5 画像検証
+- Pillow で画像として開けるか
+- 壊れたファイルを弾く
+- 必要に応じて width / height 取得
+
+13.6 ファイル名の扱い
+- 元ファイル名を保存名にそのまま使わない
+- UUID + 正規化拡張子を使用する
+
+==================================================
+14. ファイル保存設計
+==================================================
+
+14.1 保存先
+初期:
+- app/static/uploads/{job_id}/
+
+14.2 命名規則
+- stored filename = {uuid4}.{ext}
+
+14.3 保存時に持つ情報
+- job_id
+- original filename
+- stored filename
+- relative path
+- size bytes
+- image metadata
+
+14.4 将来の差し替え方針
+インターフェースを揃えておくことで、
+- LocalStorageService
+- S3StorageService
+- R2StorageService
+に差し替え可能にする
+
+==================================================
+15. ダミー解析設計
+==================================================
+
+15.1 目的
+- UI フロー確立
+- サービス分離
+- 将来の AI 化に備えた契約面の固定
+
+15.2 入力
+- 保存済み UploadedImageInfo の配列
+
+15.3 出力
+- DummyAnalysisResult
+
+15.4 ダミー処理例
+各画像に対して:
+- ラベルを疑似生成
+- スコアをランダムまたは deterministic に生成
+- コメントをテンプレートから生成
+
+例:
+- "サンプル画像として受理しました"
+- "明るい印象のダミー結果です"
+- "画像サイズに基づく仮スコア: 82"
+
+15.5 重要方針
+- ルーター内にダミー処理を書かない
+- ダミーでも戻り値の構造を安定させる
+- 将来 AI 化してもテンプレート側を壊さない
+
+==================================================
+16. 表示データ組み立て
+==================================================
+
+result_service の責務:
+- upload service / analyzer の結果を画面向けに整形
+- テンプレートへ渡しやすい形へ変換
+- job summary を生成
+- 画像 URL を生成
+- UI 表示用メッセージを集約
+
+==================================================
+17. エラーハンドリング設計
+==================================================
+
+17.1 想定エラー
+- ValidationError
+- UnsupportedFileTypeError
+- TooManyFilesError
+- FileTooLargeError
+- CorruptedImageError
+- SaveFileError
+- AnalyzeError
+- UnexpectedError
+
+17.2 表示方針
+- ユーザー向けには簡潔な文言
+- 詳細はログへ出す
+- HTMX 向けには partial を返す
+- 必要なら HTTP ステータスも付与
+
+17.3 例
+ユーザー向け:
+- "画像が選択されていません"
+- "対応していない画像形式です"
+- "アップロード上限を超えています"
+- "画像の処理に失敗しました"
+
+==================================================
+18. 設定設計
+==================================================
+
+config.py にて管理する想定設定:
+
+- APP_NAME
+- APP_ENV
+- DEBUG
+- HOST
+- PORT
+- MAX_UPLOAD_FILES
+- MAX_FILE_SIZE_MB
+- UPLOAD_DIR
+- ALLOWED_EXTENSIONS
+- ALLOWED_CONTENT_TYPES
+- ENABLE_IMAGE_PREVIEW
+- LOG_LEVEL
+
+.env.example 例:
+
+APP_NAME=photo-upload-app
+APP_ENV=local
+DEBUG=true
+HOST=0.0.0.0
+PORT=8000
+MAX_UPLOAD_FILES=10
+MAX_FILE_SIZE_MB=10
+UPLOAD_DIR=app/static/uploads
+LOG_LEVEL=INFO
+
+==================================================
+19. main.py 設計方針
+==================================================
+
+main.py は薄く保つ。
+
+含めるもの:
+- settings 読み込み
+- FastAPI() 生成
+- static mount
+- template 設定
+- routers include
+- exception handler 登録
+- lifespan
+
+避けるもの:
+- ビジネスロジック
+- ファイル入出力
+- HTML 組み立ての本体
+
+==================================================
+20. 依存関係の方向
+==================================================
+
+依存方向:
+routes -> services -> utils/core/schemas
+
+望ましい状態:
+- routes は services を呼ぶだけ
+- services は routes を知らない
+- templates は services を知らない
+- config は一方向に参照される
+
+循環参照は禁止。
+
+==================================================
+21. HTML / HTMX 設計方針
+==================================================
+
+21.1 フォーム
+- method="post"
+- enctype 相当は hx-encoding で multipart/form-data
+- input type=file multiple accept=image/*
+
+21.2 HTMX 属性例
+- hx-post="/uploads"
+- hx-target="#result-area"
+- hx-swap="innerHTML"
+- hx-indicator="#loading"
+
+21.3 推奨 UX
+- アップロード中インジケータ表示
+- 成功時に結果一覧表示
+- 失敗時にエラーメッセージ表示
+- 必要なら選択ファイル名プレビュー
+
+==================================================
+22. CSS / JS 方針
+==================================================
+
+22.1 CSS
+- 最初は素の CSS で十分
+- コンポーネント単位にクラス設計
+- utility 化しすぎない
+- 過剰なフレームワークを避ける
+
+22.2 JavaScript
+- 最小限に抑える
+- ファイル選択数表示
+- 簡易プレビュー
+- HTMX のイベントフック
+- 必須でない処理は JS に寄せない
+
+==================================================
+23. テスト設計
+==================================================
+
+23.1 テストレイヤ
+- route test
+- service unit test
+- utility test
+
+23.2 最低限必要なテスト
+1. GET / が 200 を返す
+2. 正常な複数画像アップロードで partial が返る
+3. 0 件アップロードでエラー
+4. 不正拡張子でエラー
+5. 上限件数超過でエラー
+6. 壊れた画像でエラー
+7. ダミー解析結果の構造が正しい
+8. 保存ファイルパスが想定通り
+
+23.3 将来追加テスト
+- 非同期ジョブ
+- DB 永続化
+- S3 保存
+- OCR / AI プロバイダ呼び出し
+- テンプレートスナップショット
+
+==================================================
+24. ログ設計
+==================================================
+
+24.1 ログで出す内容
+- request_id or job_id
+- uploaded file count
+- stored path
+- validation fail reason
+- analyze start / end
+- unexpected exception
+
+24.2 ログに出さないもの
+- 生画像データ
+- 過剰な個人情報
+- セキュア情報
+- 秘密鍵や接続文字列
+
+24.3 例
+INFO:
+- upload job started
+- files saved
+- dummy analyze completed
+
+WARNING:
+- invalid content type
+- too many files
+
+ERROR:
+- failed to save file
+- analyzer failed
+
+==================================================
+25. セキュリティ設計
+==================================================
+
+25.1 初期対策
+- 拡張子チェック
+- MIME チェック
+- 画像として開けるか確認
+- 保存ファイル名の UUID 化
+- パス traversal 防止
+- サイズ制限
+
+25.2 将来対策
+- 認証
+- rate limit
+- CSRF 方針整理
+- S3 presigned upload
+- malware scan
+- 監査ログ
+
+==================================================
+26. 非機能要件
+==================================================
+
+26.1 性能
+- 初期版は軽量運用
+- 同時ユーザー少数想定
+- 1 リクエスト内で最大 10 枚程度
+
+26.2 保守性
+- 層分離
+- 型付け
+- テスト容易性
+- 設定外出し
+
+26.3 可観測性
+- job_id ログ
+- エラーログ
+- health endpoint
+
+26.4 拡張性
+- ストレージ差し替え可能
+- analyzer 差し替え可能
+- DB 導入しやすい
+- async queue 追加しやすい
+
+==================================================
+27. 将来拡張設計
+==================================================
+
+27.1 DB 導入
+導入タイミング:
+- 履歴保存が必要になった時
+- 再表示や検索が必要になった時
+
+候補テーブル:
+- upload_jobs
+- uploaded_images
+- analysis_results
+
+27.2 非同期化
+導入タイミング:
+- AI 処理が数秒以上かかる時
+- 同時処理をさばく必要がある時
+
+構成:
+FastAPI -> Redis -> Worker -> DB / Storage
+
+27.3 AI 解析への差し替え
+dummy_analyzer を analyzer interface に切り出す。
+
+例:
+- BaseAnalyzer
+- DummyAnalyzer
+- OCRAnalyzer
+- VisionAnalyzer
+- ReviewGeneratorAnalyzer
+
+27.4 オブジェクトストレージ
+LocalStorageService を抽象化し、
+S3/R2 へ切り替える。
+
+==================================================
+28. 推奨開発フロー
+==================================================
+
+Phase 1:
+- 画面表示
+- 複数画像アップロード
+- ローカル保存
+- ダミー解析
+- partial 表示
+
+Phase 2:
+- Pillow によるメタ情報取得
+- バリデーション強化
+- エラー partial 整備
+- テスト整備
+
+Phase 3:
+- job_id ベース履歴
+- DB 導入
+- 再解析
+- 削除機能
+
+Phase 4:
+- 非同期化
+- オブジェクトストレージ
+- AI/OCR 導入
+
+==================================================
+29. コーディング規約
+==================================================
+
+- 型ヒントを必須とする
+- サービスは単一責務を意識する
+- ルーターは薄く保つ
+- マジックナンバーは constants / config へ
+- 例外は握りつぶさず明示する
+- docstring / コメントは日本語で統一してよい
+- 関数名、変数名、モジュール名は英語
+- ファイル名は snake_case
+- HTML partial は責務ごとに分割する
+
+==================================================
+30. サンプル pyproject.toml 方針
+==================================================
+
+依存の考え方:
+- 本番依存は最小限
+- 開発依存を別グループ化
+- lint / test / typecheck を CI に載せやすくする
+
+想定依存:
+- fastapi
+- uvicorn[standard]
+- jinja2
+- python-multipart
+- pydantic
+- pydantic-settings
+- pillow
+
+開発依存:
+- pytest
+- httpx
+- ruff
+- mypy
+- pre-commit
+
+==================================================
+31. Docker 方針
+==================================================
+
+初期は必須ではないが、導入するなら:
+- Python slim ベース
+- non-root user
+- app ディレクトリをコピー
+- uvicorn 起動
+- volume で uploads を外出し可能にする
+
+将来:
+- app
+- worker
+- redis
+- db
+
+へ分割可能な構成にする
+
+==================================================
+32. CI 方針
+==================================================
+
+最低限:
+- ruff check
+- mypy
+- pytest
+
+将来:
+- build image
+- security scan
+- deploy
+
+==================================================
+33. 画面要件
+==================================================
+
+必須要素:
+- ページタイトル
+- 複数画像選択 input
+- アップロードボタン
+- アップロード中表示
+- 結果表示領域
+- エラー表示領域
+
+推奨要素:
+- 選択中ファイル数
+- 選択ファイル一覧
+- 各画像のサムネイル
+- job_id 表示
+- 再アップロード導線
+
+==================================================
+34. レスポンス方針
+==================================================
+
+HTMX 用:
+- 基本は HTML partial を返す
+
+API 追加時:
+- JSON を返す別エンドポイントを作る
+- HTML と JSON の責務を混ぜすぎない
+
+==================================================
+35. 初期版での実装優先順位
+==================================================
+
+優先度 高:
+1. ディレクトリ骨格
+2. GET /
+3. POST /uploads
+4. 保存処理
+5. ダミー解析
+6. partial 表示
+7. バリデーション
+8. 基本テスト
+
+優先度 中:
+9. サムネイル表示
+10. エラー partial 整備
+11. ログ整備
+12. 設定ファイル整理
+
+優先度 低:
+13. DB
+14. 非同期化
+15. S3
+16. AI 連携
+
+==================================================
+36. 最終推奨
+==================================================
+
+このアプリは、最初から大規模な SPA や複雑なマイクロサービスにせず、
+FastAPI + Jinja2 + HTMX を軸にしたシンプルなモノリスとして始めるのが最適である。
+
+特に重要なのは以下の 5 点である。
+
+1. ルーターを薄く保ち、処理を services に逃がすこと
+2. ダミー解析でも戻り値を構造化しておくこと
+3. job_id 単位で処理を管理すること
+4. HTML partial 中心で HTMX に返すこと
+5. 将来の AI / DB / 非同期化を見据えて、保存と解析を抽象化すること
+
+この設計に従えば、初期実装は軽量でありながら、後から
+画像解析アプリとして段階的に育てやすい構成になる。
+
+==================================================
+37. 実装開始時の推奨タスク
+==================================================
+
+- app ディレクトリを作成する
+- core/config.py を作る
+- main.py で app, templates, static, router を登録する
+- pages.py で GET / を返す
+- uploads.py で複数ファイル POST を受ける
+- file_service.py で保存処理を書く
+- dummy_analyzer.py で仮結果を返す
+- upload_result.html で表示する
+- pytest で正常系と異常系を作る
+- ruff / mypy / pre-commit を入れる
+
+以上

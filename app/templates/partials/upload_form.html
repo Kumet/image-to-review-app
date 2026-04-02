@@ -1,0 +1,31 @@
+<form
+  class="upload-form"
+  hx-post="/uploads"
+  hx-target="#result-area"
+  hx-swap="innerHTML"
+  hx-encoding="multipart/form-data"
+>
+  <div class="upload-form__row">
+    <label class="file-input-label" for="images">画像ファイル</label>
+    <input
+      id="images"
+      name="images"
+      type="file"
+      accept="image/*"
+      multiple
+      required
+    >
+  </div>
+
+  <p class="hint">
+    最大 {{ settings.max_upload_files }} 件 / 1 ファイル {{ settings.max_file_size_mb }} MB まで対応します。
+    対応拡張子: {{ settings.allowed_extensions | join(", ") }}
+  </p>
+
+  <div class="selection-summary">
+    <span id="selected-count">0 件選択</span>
+  </div>
+  <ul id="selected-files" class="selected-files"></ul>
+
+  <button class="primary-button" type="submit">アップロードして解析</button>
+</form>

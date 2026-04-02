@@ -19,7 +19,21 @@ def test_dummy_analyzer_returns_structured_and_stable_result(tmp_path: Path) -> 
         width=100,
         height=80,
     )
-    job = UploadJob(job_id="job-1", uploaded_at=utc_now(), file_count=1, files=[uploaded])
+    second_uploaded = UploadedImageInfo(
+        original_filename="sample-detail.png",
+        stored_filename="stored-detail.png",
+        relative_path="uploads/job-1/stored-detail.png",
+        content_type="image/png",
+        size_bytes=2048,
+        width=320,
+        height=240,
+    )
+    job = UploadJob(
+        job_id="job-1",
+        uploaded_at=utc_now(),
+        file_count=2,
+        files=[uploaded, second_uploaded],
+    )
     field_service = ExtractionFieldService(tmp_path / "config" / "extraction_fields.json")
     field_service.ensure_config_file()
     analyzer = DummyAnalyzer(field_service)
@@ -29,11 +43,9 @@ def test_dummy_analyzer_returns_structured_and_stable_result(tmp_path: Path) -> 
 
     assert first.model_dump() == second.model_dump()
     assert first.job_id == "job-1"
-    assert len(first.item_results) == 1
-    assert first.item_results[0].filename == "stored.png"
-    assert 60.0 <= first.item_results[0].score <= 100.0
-    assert first.item_results[0].comment
-    assert [field.key for field in first.item_results[0].extracted_fields] == [
+    assert first.source_image_count == 2
+    assert "2 枚の画像を統合" in first.summary
+    assert [field.key for field in first.extracted_fields] == [
         "product_name",
         "ingredients",
         "calories",
@@ -68,5 +80,5 @@ def test_dummy_analyzer_respects_enabled_fields(tmp_path: Path) -> None:
 
     result = analyzer.analyze(job)
 
-    returned_keys = [field.key for field in result.item_results[0].extracted_fields]
+    returned_keys = [field.key for field in result.extracted_fields]
     assert "brand_name" not in returned_keys

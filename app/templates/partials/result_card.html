@@ -1,44 +1,19 @@
-<article class="result-card">
-  <img
-    class="result-card__image"
-    src="{{ item.preview_url }}"
-    alt="{{ item.original_filename }}"
-    loading="lazy"
-  >
+<article class="panel">
   <div class="result-card__body">
-    <h4>{{ item.original_filename }}</h4>
-    <p class="badge">{{ item.dummy_label }}</p>
-    <dl class="meta-list">
-      <div>
-        <dt>スコア</dt>
-        <dd>{{ item.score }} 点</dd>
-      </div>
-      <div>
-        <dt>サイズ</dt>
-        <dd>{{ item.size_kb }}</dd>
-      </div>
-      <div>
-        <dt>画像寸法</dt>
-        <dd>{{ item.dimensions }}</dd>
-      </div>
-      <div>
-        <dt>MIME</dt>
-        <dd>{{ item.content_type }}</dd>
-      </div>
-    </dl>
-    <p class="comment">{{ item.comment }}</p>
+    <h4>統合抽出結果</h4>
+    <p class="comment">アップロードした複数画像をまとめて 1 件の結果に統合しています。</p>
     <dl class="extracted-fields">
-      {% for field in item.extracted_fields %}
+      {% for field in result.unified_result.extracted_fields %}
       <div class="field-row">
         <dt>{{ field.label }}</dt>
         <dd>{{ field.value }}</dd>
       </div>
       {% endfor %}
     </dl>
-    {% if item.generated_articles %}
+    {% if result.unified_result.generated_articles %}
     <section class="generated-articles">
       <h5>生成記事</h5>
-      {% for article in item.generated_articles %}
+      {% for article in result.unified_result.generated_articles %}
       <article class="generated-article">
         <p class="generated-article__meta">{{ article.template_name }}</p>
         <h6>{{ article.title }}</h6>

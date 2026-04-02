@@ -14,14 +14,6 @@ class ExtractedFieldResult(AppSchema):
     confidence: float | None = None
 
 
-class DummyItemResult(AppSchema):
-    filename: str
-    dummy_label: str
-    score: float
-    comment: str
-    extracted_fields: list[ExtractedFieldResult]
-
-
 class UploadResultFieldView(AppSchema):
     key: str
     label: str
@@ -38,19 +30,21 @@ class GeneratedArticleView(AppSchema):
 class DummyAnalysisResult(AppSchema):
     job_id: str
     summary: str
-    item_results: list[DummyItemResult]
+    source_image_count: int
+    extracted_fields: list[ExtractedFieldResult]
 
 
-class UploadResultItemView(AppSchema):
+class UploadImageView(AppSchema):
     original_filename: str
     stored_filename: str
     preview_url: str
     content_type: str
     size_kb: str
     dimensions: str
-    dummy_label: str
-    score: float
-    comment: str
+
+
+class UnifiedResultView(AppSchema):
+    source_image_count: int
     extracted_fields: list[UploadResultFieldView]
     generated_articles: list[GeneratedArticleView]
 
@@ -60,8 +54,8 @@ class UploadResultView(AppSchema):
     uploaded_at: str
     file_count: int
     summary: str
-    average_score: float
-    items: list[UploadResultItemView]
+    source_images: list[UploadImageView]
+    unified_result: UnifiedResultView
 
 
 class UploadProcessOutcome(AppSchema):

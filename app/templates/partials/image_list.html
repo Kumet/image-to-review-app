@@ -1,5 +1,29 @@
 <div class="card-grid">
-  {% for item in result.items %}
-    {% include "partials/result_card.html" %}
+  {% for image in result.source_images %}
+  <article class="result-card">
+    <img
+      class="result-card__image"
+      src="{{ image.preview_url }}"
+      alt="{{ image.original_filename }}"
+      loading="lazy"
+    >
+    <div class="result-card__body">
+      <h4>{{ image.original_filename }}</h4>
+      <dl class="meta-list">
+        <div>
+          <dt>サイズ</dt>
+          <dd>{{ image.size_kb }}</dd>
+        </div>
+        <div>
+          <dt>画像寸法</dt>
+          <dd>{{ image.dimensions }}</dd>
+        </div>
+        <div>
+          <dt>MIME</dt>
+          <dd>{{ image.content_type }}</dd>
+        </div>
+      </dl>
+    </div>
+  </article>
   {% endfor %}
 </div>

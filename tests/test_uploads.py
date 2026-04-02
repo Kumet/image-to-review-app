@@ -18,10 +18,11 @@ def test_uploads_returns_partial_for_valid_images(
     )
 
     assert response.status_code == 200
-    assert "解析結果" in response.text
+    assert "統合推論結果" in response.text
     assert "sample-1.png" in response.text
     assert "sample-2.jpg" in response.text
     assert "/static/uploads/" in response.text
+    assert "2 枚の画像を統合" in response.text
     assert "商品名" in response.text
     assert "原材料" in response.text
     assert "カロリー" in response.text
@@ -29,7 +30,9 @@ def test_uploads_returns_partial_for_valid_images(
     assert "商品概要" in response.text
     assert "生成記事" in response.text
     assert "商品紹介ブログ" in response.text
-    assert "sample-1 を紹介" in response.text
+    assert "統合推定商品 sample-1 を紹介" in response.text
+    assert "平均" not in response.text
+    assert "スコア" not in response.text
 
 
 def test_uploads_returns_error_when_no_files_selected(client: TestClient) -> None:

@@ -3,18 +3,19 @@
 <section class="result-panel">
   <div class="result-panel__header">
     <div>
-      <h3>解析結果</h3>
+      <h3>統合推論結果</h3>
       <p class="meta-text">job_id: {{ result.job_id }}</p>
       <p class="meta-text">uploaded_at: {{ result.uploaded_at }}</p>
     </div>
     <div class="summary-stats">
       <span>{{ result.file_count }} 件</span>
-      <span>平均 {{ result.average_score }} 点</span>
+      <span>統合推論 1 件</span>
     </div>
   </div>
 
   <p class="result-summary">{{ result.summary }}</p>
-  <p class="result-summary">抽出結果を記事テンプレートへ当てはめた文章もあわせて表示します。</p>
+  <p class="result-summary">複数画像をまとめて 1 件の推論結果として表示します。</p>
 
   {% include "partials/image_list.html" %}
+  {% include "partials/result_card.html" %}
 </section>

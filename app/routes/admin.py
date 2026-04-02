@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Form, Request
+from fastapi import APIRouter, File, Form, Request, UploadFile
 from fastapi.responses import HTMLResponse, RedirectResponse
 
 from app.schemas.admin import (
@@ -11,8 +11,99 @@ from app.schemas.admin import (
     ExtractionFieldCreate,
     ExtractionFieldUpdate,
 )
+from app.schemas.result import OCRDebugOptions
 
 router = APIRouter(prefix="/admin", tags=["admin"])
+IMAGE_FILES_OPTIONAL = File(default=None)
+
+
+@router.get("/ocr-test", response_class=HTMLResponse)
+async def ocr_test_page(request: Request) -> HTMLResponse:
+    """OCR テスト画面を返す。"""
+
+    templates = request.app.state.templates
+    settings = request.app.state.settings
+    return templates.TemplateResponse(
+        request=request,
+        name="pages/admin_ocr_test.html",
+        context={
+            "request": request,
+            "settings": settings,
+            "page_title": "OCRテスト",
+            "default_options": OCRDebugOptions(),
+            "current_analyzer_mode": request.app.state.current_analyzer_mode,
+        },
+    )
+
+
+@router.get("/analyzer-mode", response_class=HTMLResponse)
+async def analyzer_mode_page(request: Request) -> HTMLResponse:
+    """解析モード切替画面を返す。"""
+
+    templates = request.app.state.templates
+    settings = request.app.state.settings
+    return templates.TemplateResponse(
+        request=request,
+        name="pages/admin_analyzer_mode.html",
+        context={
+            "request": request,
+            "settings": settings,
+            "page_title": "解析モード設定",
+            "current_analyzer_mode": request.app.state.current_analyzer_mode,
+            "available_modes": ("dummy", "ocr"),
+        },
+    )
+
+
+@router.post("/analyzer-mode")
+async def analyzer_mode_update(
+    request: Request,
+    analyzer_mode: str = Form(...),
+) -> RedirectResponse:
+    """解析モードを更新する。"""
+
+    saved = request.app.state.analyzer_mode_service.set_mode(analyzer_mode)
+    analyzer = request.app.state.analyzer_factory.create(
+        settings=request.app.state.settings,
+        field_service=request.app.state.extraction_field_service,
+        analyzer_mode=saved.analyzer_mode,
+    )
+    request.app.state.current_analyzer_mode = saved.analyzer_mode
+    request.app.state.settings.analyzer_mode = saved.analyzer_mode
+    request.app.state.upload_service.analyzer = analyzer
+    return RedirectResponse(url="/admin/analyzer-mode", status_code=303)
+
+
+@router.post("/ocr-test", response_class=HTMLResponse)
+async def ocr_test_run(
+    request: Request,
+    images: list[UploadFile] | None = IMAGE_FILES_OPTIONAL,
+    lang: str = Form(default="jpn+eng"),
+    psm: int = Form(default=6),
+    threshold: int = Form(default=160),
+    contrast: float = Form(default=1.8),
+    resize_scale: float = Form(default=2.0),
+) -> HTMLResponse:
+    """OCR テストを実行し、結果 partial を返す。"""
+
+    templates = request.app.state.templates
+    job = await request.app.state.upload_service.save_uploads(images)
+    options = OCRDebugOptions(
+        lang=lang,
+        psm=psm,
+        threshold=threshold,
+        contrast=contrast,
+        resize_scale=resize_scale,
+    )
+    result = request.app.state.ocr_debug_service.run(job=job, options=options)
+    return templates.TemplateResponse(
+        request=request,
+        name="partials/ocr_test_result.html",
+        context={
+            "request": request,
+            "result": result,
+        },
+    )
 
 
 @router.get("/extraction-fields", response_class=HTMLResponse)

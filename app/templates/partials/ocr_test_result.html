@@ -1,0 +1,65 @@
+<div id="error-area" hx-swap-oob="innerHTML"></div>
+
+<section class="result-panel">
+  <div class="result-panel__header">
+    <div>
+      <h3>OCRテスト結果</h3>
+      <p class="meta-text">job_id: {{ result.job_id }}</p>
+      <p class="meta-text">
+        lang={{ result.options.lang }},
+        psm={{ result.options.psm }},
+        threshold={{ result.options.threshold }},
+        contrast={{ result.options.contrast }},
+        resize={{ result.options.resize_scale }}
+      </p>
+    </div>
+    <div class="summary-stats">
+      <span>{{ result.images | length }} 件</span>
+      <span>統合推論 1 件</span>
+    </div>
+  </div>
+
+  <p class="result-summary">{{ result.summary }}</p>
+
+  {% if result.unified_result.warnings %}
+  <div class="error-box">
+    <h4>Warnings</h4>
+    <ul class="ocr-warning-list">
+      {% for warning in result.unified_result.warnings %}
+      <li>{{ warning }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  <div class="ocr-debug-grid">
+    {% for image in result.images %}
+      {% include "partials/ocr_test_image_card.html" %}
+    {% endfor %}
+  </div>
+
+  <section class="panel panel--nested">
+    <h4>統合結果</h4>
+    <dl class="extracted-fields">
+      {% for field in result.unified_result.extracted_fields %}
+      <div class="field-row">
+        <dt>{{ field.label }}</dt>
+        <dd>{{ field.value }}</dd>
+      </div>
+      {% endfor %}
+    </dl>
+  </section>
+
+  <section class="panel panel--nested">
+    <h4>生成記事プレビュー</h4>
+    <div class="generated-articles">
+      {% for article in result.generated_articles %}
+      <article class="generated-article">
+        <p class="generated-article__meta">{{ article.template_name }}</p>
+        <h6>{{ article.title }}</h6>
+        <p class="generated-article__body">{{ article.body }}</p>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+</section>

@@ -14,6 +14,52 @@ class ExtractedFieldResult(AppSchema):
     confidence: float | None = None
 
 
+class OCRImageResult(AppSchema):
+    image_path: str
+    raw_text: str
+    lines: list[str]
+
+
+class ExtractedFieldCandidate(AppSchema):
+    key: str
+    value: str
+    confidence: float
+    image_id: str
+    source_text: str
+
+
+class UnifiedInferenceResult(AppSchema):
+    source_image_count: int
+    extracted_fields: list[ExtractedFieldResult]
+    warnings: list[str]
+
+
+class OCRDebugOptions(AppSchema):
+    lang: str = "jpn+eng"
+    psm: int = 6
+    threshold: int = 160
+    contrast: float = 1.8
+    resize_scale: float = 2.0
+
+
+class OCRDebugImageView(AppSchema):
+    original_filename: str
+    original_preview_url: str
+    preprocessed_preview_url: str
+    raw_text: str
+    lines: list[str]
+    candidates: list[ExtractedFieldCandidate]
+
+
+class OCRDebugResultView(AppSchema):
+    job_id: str
+    options: OCRDebugOptions
+    images: list[OCRDebugImageView]
+    unified_result: UnifiedInferenceResult
+    generated_articles: list[GeneratedArticleView]
+    summary: str
+
+
 class UploadResultFieldView(AppSchema):
     key: str
     label: str

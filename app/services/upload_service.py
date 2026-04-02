@@ -17,7 +17,7 @@ from app.core.exceptions import (
 )
 from app.schemas.result import UploadProcessOutcome
 from app.schemas.upload import UploadedImageInfo, UploadJob
-from app.services.dummy_analyzer import DummyAnalyzer
+from app.services.analyzer import Analyzer
 from app.services.file_service import FileService
 from app.services.result_service import ResultService
 from app.utils.filenames import extract_extension
@@ -36,7 +36,7 @@ class UploadService:
         *,
         settings: Settings,
         file_service: FileService,
-        analyzer: DummyAnalyzer,
+        analyzer: Analyzer,
         result_service: ResultService,
     ) -> None:
         self.settings = settings
@@ -46,6 +46,18 @@ class UploadService:
 
     async def process_uploads(self, files: list[UploadFile] | None) -> UploadProcessOutcome:
         """複数画像のアップロード処理を実行する。"""
+
+        job = await self.save_uploads(files)
+        try:
+            analysis = self.analyzer.analyze(job)
+            logger.info("analyze completed: job_id=%s", job.job_id)
+            return self.result_service.build_outcome(job=job, analysis=analysis)
+        except Exception:
+            self.file_service.delete_job_dir(job.job_id)
+            raise
+
+    async def save_uploads(self, files: list[UploadFile] | None) -> UploadJob:
+        """複数画像を検証・保存し、ジョブ情報を返す。"""
 
         upload_files = [file for file in files or [] if file.filename]
         if not upload_files:
@@ -63,15 +75,12 @@ class UploadService:
             for upload_file in upload_files:
                 saved_files.append(await self._process_single_file(job_id, upload_file))
 
-            job = UploadJob(
+            return UploadJob(
                 job_id=job_id,
                 uploaded_at=utc_now(),
                 file_count=len(saved_files),
                 files=saved_files,
             )
-            analysis = self.analyzer.analyze(job)
-            logger.info("dummy analyze completed: job_id=%s", job_id)
-            return self.result_service.build_outcome(job=job, analysis=analysis)
         except Exception:
             self.file_service.delete_job_dir(job_id)
             raise

@@ -10,6 +10,8 @@ def test_index_returns_200(client: TestClient) -> None:
     assert "複数画像アップロード" in response.text
     assert 'hx-post="/uploads"' in response.text
     assert "/admin/extraction-fields" in response.text
+    assert "/admin/analyzer-mode" in response.text
+    assert "/admin/ocr-test" in response.text
     assert "画像をドラッグ＆ドロップ" in response.text
     assert 'id="thumbnail-list"' in response.text
     assert "0 枚選択" in response.text

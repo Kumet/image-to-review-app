@@ -62,6 +62,12 @@ body {
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
 }
 
+.panel--nested {
+  margin-bottom: 0;
+  box-shadow: none;
+  background: #f8fafc;
+}
+
 .hero-panel p,
 .hint,
 .meta-text,
@@ -435,6 +441,73 @@ body {
   border: 1px solid #cbd5e1;
   border-radius: 12px;
   font: inherit;
+}
+
+.ocr-test-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.ocr-debug-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.ocr-image-card {
+  border: 1px solid #d1d5db;
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 1rem;
+}
+
+.ocr-image-card__header h4,
+.ocr-image-card__section h5 {
+  margin: 0 0 0.75rem;
+}
+
+.ocr-image-card__images {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.ocr-image-card__images figure {
+  margin: 0;
+}
+
+.ocr-image-card__images figcaption {
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.ocr-image-card__preview {
+  display: block;
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  background: #f9fafb;
+}
+
+.ocr-image-card__section + .ocr-image-card__section {
+  margin-top: 1rem;
+}
+
+.ocr-code-block {
+  margin: 0;
+  padding: 1rem;
+  border-radius: 12px;
+  background: #111827;
+  color: #f9fafb;
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+
+.ocr-line-list,
+.ocr-warning-list {
+  margin: 0;
+  padding-left: 1.2rem;
 }
 
 .checkbox-row {

@@ -38,6 +38,7 @@ def settings(tmp_path: Path) -> Settings:
         allowed_extensions=(".jpg", ".jpeg", ".png", ".webp"),
         allowed_content_types=("image/jpeg", "image/png", "image/webp"),
         enable_image_preview=True,
+        analyzer_config_path=str(tmp_path / "config" / "analyzer_settings.json"),
         log_level="INFO",
     )
 

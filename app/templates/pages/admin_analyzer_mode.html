@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="panel">
+  <div class="admin-toolbar">
+    <div>
+      <h2>解析モード設定</h2>
+      <p>アップロード時に使用する解析モードをアプリ上で切り替えます。</p>
+    </div>
+    <span class="status-badge">現在: {{ current_analyzer_mode }}</span>
+  </div>
+
+  <form class="form-grid" method="post" action="/admin/analyzer-mode">
+    <label>
+      解析モード
+      <select name="analyzer_mode">
+        {% for mode in available_modes %}
+        <option value="{{ mode }}"{% if mode == current_analyzer_mode %} selected{% endif %}>
+          {{ mode }}
+        </option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <p class="hint">
+      `dummy` は UI 検証向け、`ocr` はローカル OCR ベースです。
+      将来 `ai` と `hybrid` を追加できる設計になっています。
+    </p>
+
+    <button class="primary-button" type="submit">解析モードを更新</button>
+  </form>
+</section>
+{% endblock %}

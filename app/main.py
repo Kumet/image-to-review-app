@@ -15,11 +15,13 @@ from app.core.config import Settings, get_settings
 from app.core.exceptions import AppError
 from app.core.logging import configure_logging
 from app.routes import admin, health, pages, uploads
+from app.services.analyzer_factory import AnalyzerFactory
+from app.services.analyzer_mode_service import AnalyzerModeService
 from app.services.article_render_service import ArticleRenderService
 from app.services.article_template_service import ArticleTemplateService
-from app.services.dummy_analyzer import DummyAnalyzer
 from app.services.extraction_field_service import ExtractionFieldService
 from app.services.file_service import FileService
+from app.services.ocr_debug_service import OCRDebugService
 from app.services.result_service import ResultService
 from app.services.upload_service import UploadService
 
@@ -35,6 +37,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         resolved_settings.upload_dir_path.mkdir(parents=True, exist_ok=True)
+        app.state.analyzer_mode_service.ensure_config_file()
         app.state.extraction_field_service.ensure_config_file()
         app.state.article_template_service.ensure_config_file()
         yield
@@ -56,20 +59,40 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     article_render_service = ArticleRenderService(article_template_service)
     result_service = ResultService(article_render_service=article_render_service)
+    analyzer_mode_service = AnalyzerModeService(
+        resolved_settings.analyzer_config_file_path,
+        default_mode=resolved_settings.analyzer_mode,
+    )
+    analyzer_factory = AnalyzerFactory()
+    current_analyzer_mode = analyzer_mode_service.get_mode()
+    analyzer = analyzer_factory.create(
+        settings=resolved_settings,
+        field_service=extraction_field_service,
+        analyzer_mode=current_analyzer_mode,
+    )
     upload_service = UploadService(
         settings=resolved_settings,
         file_service=file_service,
-        analyzer=DummyAnalyzer(extraction_field_service),
+        analyzer=analyzer,
         result_service=result_service,
+    )
+    ocr_debug_service = OCRDebugService(
+        upload_root=resolved_settings.upload_dir_path,
+        field_service=extraction_field_service,
+        article_render_service=article_render_service,
     )
 
     app.state.settings = resolved_settings
     app.state.templates = templates
     app.state.file_service = file_service
+    app.state.current_analyzer_mode = current_analyzer_mode
+    app.state.analyzer_mode_service = analyzer_mode_service
     app.state.extraction_field_service = extraction_field_service
     app.state.article_template_service = article_template_service
     app.state.article_render_service = article_render_service
+    app.state.analyzer_factory = analyzer_factory
     app.state.upload_service = upload_service
+    app.state.ocr_debug_service = ocr_debug_service
 
     app.mount("/static", StaticFiles(directory=str(resolved_settings.static_dir)), name="static")
 

@@ -10,3 +10,4 @@ __pycache__/
 *.py[cod]
 app/static/uploads/*
 !app/static/uploads/.gitkeep
+config/analyzer_settings.json

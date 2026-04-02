@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="panel hero-panel">
+  <h2>OCRテスト</h2>
+  <p>
+    推論で使用する OCR パイプラインを個別に確認します。前処理後画像、OCR 生テキスト、
+    抽出候補、統合結果をブラウザ上で比較できます。
+  </p>
+</section>
+
+<section class="panel">
+  <form
+    class="form-grid"
+    hx-post="/admin/ocr-test"
+    hx-target="#ocr-test-result-area"
+    hx-swap="innerHTML"
+    hx-encoding="multipart/form-data"
+  >
+    <label>
+      画像ファイル
+      <input id="images" name="images" type="file" accept="image/*" multiple required>
+    </label>
+
+    <div class="ocr-test-options">
+      <label>
+        OCR言語
+        <input name="lang" type="text" value="{{ default_options.lang }}">
+      </label>
+      <label>
+        PSM
+        <input name="psm" type="number" min="3" max="13" value="{{ default_options.psm }}">
+      </label>
+      <label>
+        二値化閾値
+        <input name="threshold" type="number" min="0" max="255" value="{{ default_options.threshold }}">
+      </label>
+      <label>
+        コントラスト
+        <input name="contrast" type="number" min="0.1" max="5" step="0.1" value="{{ default_options.contrast }}">
+      </label>
+      <label>
+        リサイズ倍率
+        <input name="resize_scale" type="number" min="1" max="4" step="0.1" value="{{ default_options.resize_scale }}">
+      </label>
+    </div>
+
+    <p class="hint">
+      まずは `jpn+eng` / `psm=6` / 閾値 `160` / コントラスト `1.8` / 倍率 `2.0` から比較してください。
+    </p>
+
+    <button class="primary-button" type="submit">OCRテストを実行</button>
+  </form>
+</section>
+
+<section class="panel">
+  <h3>エラー</h3>
+  <div id="error-area" class="empty-area">現在エラーはありません。</div>
+</section>
+
+<section class="panel">
+  <h3>テスト結果</h3>
+  <div id="ocr-test-result-area" class="empty-area">まだ OCR テスト結果はありません。</div>
+</section>
+{% endblock %}

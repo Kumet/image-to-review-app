@@ -16,6 +16,7 @@ from pydantic_settings import (
 from app.core.constants import DEFAULT_ALLOWED_CONTENT_TYPES, DEFAULT_ALLOWED_EXTENSIONS
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
+ALLOWED_ANALYZER_MODES = ("dummy", "ocr", "ai", "hybrid")
 
 
 def _parse_env_list(value: Any) -> tuple[str, ...]:
@@ -50,7 +51,9 @@ class Settings(BaseSettings):
     allowed_extensions: tuple[str, ...] = DEFAULT_ALLOWED_EXTENSIONS
     allowed_content_types: tuple[str, ...] = DEFAULT_ALLOWED_CONTENT_TYPES
     enable_image_preview: bool = True
+    analyzer_mode: str = "ocr"
     log_level: str = "INFO"
+    analyzer_config_path: str = "config/analyzer_settings.json"
     extraction_config_path: str = "config/extraction_fields.json"
     article_template_config_path: str = "config/article_templates.json"
 
@@ -64,6 +67,15 @@ class Settings(BaseSettings):
     @classmethod
     def parse_allowed_content_types(cls, value: Any) -> tuple[str, ...]:
         return _parse_env_list(value) or DEFAULT_ALLOWED_CONTENT_TYPES
+
+    @field_validator("analyzer_mode")
+    @classmethod
+    def validate_analyzer_mode(cls, value: str) -> str:
+        normalized = value.strip().lower()
+        if normalized not in ALLOWED_ANALYZER_MODES:
+            allowed = ", ".join(ALLOWED_ANALYZER_MODES)
+            raise ValueError(f"Unsupported analyzer_mode. Choose one of: {allowed}")
+        return normalized
 
     @classmethod
     def settings_customise_sources(
@@ -105,6 +117,13 @@ class Settings(BaseSettings):
     @property
     def article_template_config_file_path(self) -> Path:
         config_path = Path(self.article_template_config_path)
+        if config_path.is_absolute():
+            return config_path
+        return (PROJECT_ROOT / config_path).resolve()
+
+    @property
+    def analyzer_config_file_path(self) -> Path:
+        config_path = Path(self.analyzer_config_path)
         if config_path.is_absolute():
             return config_path
         return (PROJECT_ROOT / config_path).resolve()

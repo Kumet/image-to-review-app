@@ -1,0 +1,64 @@
+<article class="ocr-image-card">
+  <div class="ocr-image-card__header">
+    <h4>{{ image.original_filename }}</h4>
+  </div>
+
+  <div class="ocr-image-card__images">
+    <figure>
+      <figcaption>元画像</figcaption>
+      <img class="ocr-image-card__preview" src="{{ image.original_preview_url }}" alt="{{ image.original_filename }}">
+    </figure>
+    <figure>
+      <figcaption>前処理後</figcaption>
+      <img class="ocr-image-card__preview" src="{{ image.preprocessed_preview_url }}" alt="{{ image.original_filename }} 前処理後">
+    </figure>
+  </div>
+
+  <div class="ocr-image-card__section">
+    <h5>OCR 生テキスト</h5>
+    <pre class="ocr-code-block">{{ image.raw_text if image.raw_text else "OCR テキストなし" }}</pre>
+  </div>
+
+  <div class="ocr-image-card__section">
+    <h5>正規化行</h5>
+    {% if image.lines %}
+    <ol class="ocr-line-list">
+      {% for line in image.lines %}
+      <li><code>{{ line }}</code></li>
+      {% endfor %}
+    </ol>
+    {% else %}
+    <p class="empty-area">行データはありません。</p>
+    {% endif %}
+  </div>
+
+  <div class="ocr-image-card__section">
+    <h5>抽出候補</h5>
+    {% if image.candidates %}
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>image_id</th>
+          <th>key</th>
+          <th>value</th>
+          <th>confidence</th>
+          <th>source_text</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for candidate in image.candidates %}
+        <tr>
+          <td><code>{{ candidate.image_id }}</code></td>
+          <td><code>{{ candidate.key }}</code></td>
+          <td>{{ candidate.value }}</td>
+          <td>{{ "%.2f"|format(candidate.confidence) }}</td>
+          <td><code>{{ candidate.source_text }}</code></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="empty-area">抽出候補はありません。</p>
+    {% endif %}
+  </div>
+</article>

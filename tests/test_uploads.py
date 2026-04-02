@@ -1,6 +1,44 @@
 from __future__ import annotations
 
+from typing import Any, cast
+
 from fastapi.testclient import TestClient
+
+from app.schemas.result import DummyAnalysisResult, ExtractedFieldResult
+
+
+class StubAnalyzer:
+    def analyze(self, job: object) -> DummyAnalysisResult:
+        return DummyAnalysisResult(
+            job_id="job-stub",
+            summary=(
+                "2 枚の画像を統合して 1 件の推論結果を作成しました。"
+                "ローカル OCR による統合推論結果です。"
+            ),
+            source_image_count=2,
+            extracted_fields=[
+                ExtractedFieldResult(
+                    key="product_name",
+                    label="商品名",
+                    value="濃厚チーズせんべい",
+                ),
+                ExtractedFieldResult(
+                    key="ingredients",
+                    label="原材料",
+                    value="チーズ、でん粉、食塩",
+                ),
+                ExtractedFieldResult(key="calories", label="カロリー", value="245 kcal"),
+                ExtractedFieldResult(key="price", label="値段", value="198円"),
+                ExtractedFieldResult(
+                    key="summary",
+                    label="商品概要",
+                    value=(
+                        "濃厚チーズせんべい は チーズ、でん粉、食塩 を含む商品で、"
+                        "245 kcal、価格は 198円 です。"
+                    ),
+                ),
+            ],
+        )
 
 
 def test_uploads_returns_partial_for_valid_images(
@@ -8,6 +46,7 @@ def test_uploads_returns_partial_for_valid_images(
     png_image_bytes: bytes,
     jpeg_image_bytes: bytes,
 ) -> None:
+    cast(Any, client.app).state.upload_service.analyzer = StubAnalyzer()
     response = client.post(
         "/uploads",
         headers={"HX-Request": "true"},
@@ -30,7 +69,7 @@ def test_uploads_returns_partial_for_valid_images(
     assert "商品概要" in response.text
     assert "生成記事" in response.text
     assert "商品紹介ブログ" in response.text
-    assert "統合推定商品 sample-1 を紹介" in response.text
+    assert "濃厚チーズせんべい を紹介" in response.text
     assert "平均" not in response.text
     assert "スコア" not in response.text
 

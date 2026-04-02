@@ -6,11 +6,26 @@ from app.schemas.common import AppSchema
 from app.schemas.upload import UploadJob
 
 
+class ExtractedFieldResult(AppSchema):
+    key: str
+    label: str
+    value: str
+    source: str = "dummy"
+    confidence: float | None = None
+
+
 class DummyItemResult(AppSchema):
     filename: str
     dummy_label: str
     score: float
     comment: str
+    extracted_fields: list[ExtractedFieldResult]
+
+
+class UploadResultFieldView(AppSchema):
+    key: str
+    label: str
+    value: str
 
 
 class DummyAnalysisResult(AppSchema):
@@ -29,6 +44,7 @@ class UploadResultItemView(AppSchema):
     dummy_label: str
     score: float
     comment: str
+    extracted_fields: list[UploadResultFieldView]
 
 
 class UploadResultView(AppSchema):

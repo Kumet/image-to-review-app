@@ -27,5 +27,13 @@
       </div>
     </dl>
     <p class="comment">{{ item.comment }}</p>
+    <dl class="extracted-fields">
+      {% for field in item.extracted_fields %}
+      <div class="field-row">
+        <dt>{{ field.label }}</dt>
+        <dd>{{ field.value }}</dd>
+      </div>
+      {% endfor %}
+    </dl>
   </div>
 </article>

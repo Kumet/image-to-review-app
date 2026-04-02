@@ -24,3 +24,63 @@ DUMMY_COMMENTS: tuple[str, ...] = (
     "画像サイズに基づく仮スコアを算出しました。",
     "将来の AI 解析へ差し替えやすい構造で返却しています。",
 )
+
+DEFAULT_EXTRACTION_FIELDS: tuple[dict[str, object], ...] = (
+    {
+        "field_id": "field_product_name",
+        "key": "product_name",
+        "label": "商品名",
+        "field_type": "text",
+        "enabled": True,
+        "required": True,
+        "sort_order": 1,
+        "placeholder": "商品ラベルに記載された名称",
+        "description": "商品パッケージ上の名称を想定した抽出項目です。",
+    },
+    {
+        "field_id": "field_ingredients",
+        "key": "ingredients",
+        "label": "原材料",
+        "field_type": "long_text",
+        "enabled": True,
+        "required": False,
+        "sort_order": 2,
+        "placeholder": "原材料一覧",
+        "description": "原材料表示欄を想定した抽出項目です。",
+    },
+    {
+        "field_id": "field_calories",
+        "key": "calories",
+        "label": "カロリー",
+        "field_type": "text",
+        "enabled": True,
+        "required": False,
+        "sort_order": 3,
+        "placeholder": "例: 245 kcal",
+        "description": "栄養成分表示から取得する想定です。",
+    },
+    {
+        "field_id": "field_price",
+        "key": "price",
+        "label": "値段",
+        "field_type": "currency",
+        "enabled": True,
+        "required": False,
+        "sort_order": 4,
+        "placeholder": "例: 198円",
+        "description": "値札や商品画像に含まれる価格を想定します。",
+    },
+    {
+        "field_id": "field_summary",
+        "key": "summary",
+        "label": "商品概要",
+        "field_type": "long_text",
+        "enabled": True,
+        "required": False,
+        "sort_order": 5,
+        "placeholder": "商品特徴の要約",
+        "description": "商品画像全体から生成する説明文を想定します。",
+    },
+)
+
+ALLOWED_FIELD_TYPES: tuple[str, ...] = ("text", "long_text", "number", "currency")

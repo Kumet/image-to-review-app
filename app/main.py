@@ -14,8 +14,9 @@ from fastapi.templating import Jinja2Templates
 from app.core.config import Settings, get_settings
 from app.core.exceptions import AppError
 from app.core.logging import configure_logging
-from app.routes import health, pages, uploads
+from app.routes import admin, health, pages, uploads
 from app.services.dummy_analyzer import DummyAnalyzer
+from app.services.extraction_field_service import ExtractionFieldService
 from app.services.file_service import FileService
 from app.services.result_service import ResultService
 from app.services.upload_service import UploadService
@@ -32,6 +33,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         resolved_settings.upload_dir_path.mkdir(parents=True, exist_ok=True)
+        app.state.extraction_field_service.ensure_config_file()
         yield
 
     app = FastAPI(
@@ -43,22 +45,27 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     templates.env.globals["app_name"] = resolved_settings.app_name
 
     file_service = FileService(resolved_settings.upload_dir_path)
+    extraction_field_service = ExtractionFieldService(
+        resolved_settings.extraction_config_file_path
+    )
     result_service = ResultService()
     upload_service = UploadService(
         settings=resolved_settings,
         file_service=file_service,
-        analyzer=DummyAnalyzer(),
+        analyzer=DummyAnalyzer(extraction_field_service),
         result_service=result_service,
     )
 
     app.state.settings = resolved_settings
     app.state.templates = templates
     app.state.file_service = file_service
+    app.state.extraction_field_service = extraction_field_service
     app.state.upload_service = upload_service
 
     app.mount("/static", StaticFiles(directory=str(resolved_settings.static_dir)), name="static")
 
     app.include_router(pages.router)
+    app.include_router(admin.router)
     app.include_router(uploads.router)
     app.include_router(health.router)
 

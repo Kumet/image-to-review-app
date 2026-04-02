@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="panel">
+  <div class="admin-toolbar">
+    <div>
+      <h2>抽出項目管理</h2>
+      <p>アップロード結果に表示する抽出項目を管理します。</p>
+    </div>
+    <a class="secondary-button" href="/admin/extraction-fields/new">新規項目を追加</a>
+  </div>
+
+  <form class="admin-reorder-form" method="post" action="/admin/extraction-field-actions/reorder">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>順序</th>
+          <th>ラベル</th>
+          <th>key</th>
+          <th>型</th>
+          <th>状態</th>
+          <th>説明</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for field in fields %}
+        <tr>
+          <td>
+            <input type="hidden" name="field_ids" value="{{ field.field_id }}">
+            {{ field.sort_order }}
+          </td>
+          <td>{{ field.label }}</td>
+          <td><code>{{ field.key }}</code></td>
+          <td>{{ field.field_type }}</td>
+          <td>
+            <span class="status-badge{% if not field.enabled %} off{% endif %}">
+              {% if field.enabled %}有効{% else %}無効{% endif %}
+            </span>
+          </td>
+          <td>{{ field.description or "-" }}</td>
+          <td class="actions">
+            <a class="link-button" href="/admin/extraction-fields/{{ field.field_id }}/edit">編集</a>
+            <button
+              class="link-button"
+              type="submit"
+              formaction="/admin/extraction-fields/{{ field.field_id }}/toggle"
+            >
+              {% if field.enabled %}無効化{% else %}有効化{% endif %}
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </form>
+</section>
+{% endblock %}

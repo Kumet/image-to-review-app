@@ -51,6 +51,7 @@ class Settings(BaseSettings):
     allowed_content_types: tuple[str, ...] = DEFAULT_ALLOWED_CONTENT_TYPES
     enable_image_preview: bool = True
     log_level: str = "INFO"
+    extraction_config_path: str = "config/extraction_fields.json"
 
     @field_validator("allowed_extensions", mode="before")
     @classmethod
@@ -92,6 +93,13 @@ class Settings(BaseSettings):
         if upload_path.is_absolute():
             return upload_path
         return (PROJECT_ROOT / upload_path).resolve()
+
+    @property
+    def extraction_config_file_path(self) -> Path:
+        config_path = Path(self.extraction_config_path)
+        if config_path.is_absolute():
+            return config_path
+        return (PROJECT_ROOT / config_path).resolve()
 
 
 @lru_cache

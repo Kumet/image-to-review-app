@@ -1,5 +1,6 @@
 .env
 .env.local
+.history/
 .mypy_cache/
 .pytest_cache/
 .ruff_cache/

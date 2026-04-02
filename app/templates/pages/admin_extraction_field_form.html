@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="panel">
+  <h2>{% if mode == "create" %}抽出項目作成{% else %}抽出項目編集{% endif %}</h2>
+  <p>アップロード結果に表示する抽出項目を設定します。</p>
+
+  <form
+    class="form-grid"
+    method="post"
+    action="{% if mode == 'create' %}/admin/extraction-fields{% else %}/admin/extraction-fields/{{ field.field_id }}{% endif %}"
+  >
+    {% if mode == "create" %}
+    <label>
+      key
+      <input type="text" name="key" required value="">
+    </label>
+    {% else %}
+    <label>
+      key
+      <input type="text" value="{{ field.key }}" disabled>
+    </label>
+    {% endif %}
+
+    <label>
+      ラベル
+      <input type="text" name="label" required value="{{ field.label if field else '' }}">
+    </label>
+
+    <label>
+      型
+      <select name="field_type">
+        {% for field_type in ["text", "long_text", "number", "currency"] %}
+        <option value="{{ field_type }}" {% if field and field.field_type == field_type %}selected{% endif %}>
+          {{ field_type }}
+        </option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <label>
+      プレースホルダー
+      <input type="text" name="placeholder" value="{{ field.placeholder if field and field.placeholder else '' }}">
+    </label>
+
+    <label>
+      説明
+      <textarea name="description" rows="4">{{ field.description if field and field.description else '' }}</textarea>
+    </label>
+
+    <div class="checkbox-row">
+      <label>
+        <input type="checkbox" name="enabled" {% if not field or field.enabled %}checked{% endif %}>
+        有効
+      </label>
+      <label>
+        <input type="checkbox" name="required" {% if field and field.required %}checked{% endif %}>
+        必須
+      </label>
+    </div>
+
+    <div class="admin-toolbar">
+      <button class="primary-button" type="submit">保存</button>
+      <a class="secondary-button" href="/admin/extraction-fields">一覧へ戻る</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

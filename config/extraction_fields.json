@@ -1,0 +1,67 @@
+[
+  {
+    "field_id": "field_product_name",
+    "key": "product_name",
+    "label": "商品名",
+    "field_type": "text",
+    "enabled": true,
+    "required": true,
+    "sort_order": 1,
+    "placeholder": "商品ラベルに記載された名称",
+    "description": "商品パッケージ上の名称を想定した抽出項目です。",
+    "created_at": "2026-04-02T00:00:00Z",
+    "updated_at": "2026-04-02T00:00:00Z"
+  },
+  {
+    "field_id": "field_ingredients",
+    "key": "ingredients",
+    "label": "原材料",
+    "field_type": "long_text",
+    "enabled": true,
+    "required": false,
+    "sort_order": 2,
+    "placeholder": "原材料一覧",
+    "description": "原材料表示欄を想定した抽出項目です。",
+    "created_at": "2026-04-02T00:00:00Z",
+    "updated_at": "2026-04-02T00:00:00Z"
+  },
+  {
+    "field_id": "field_calories",
+    "key": "calories",
+    "label": "カロリー",
+    "field_type": "text",
+    "enabled": true,
+    "required": false,
+    "sort_order": 3,
+    "placeholder": "例: 245 kcal",
+    "description": "栄養成分表示から取得する想定です。",
+    "created_at": "2026-04-02T00:00:00Z",
+    "updated_at": "2026-04-02T00:00:00Z"
+  },
+  {
+    "field_id": "field_price",
+    "key": "price",
+    "label": "値段",
+    "field_type": "currency",
+    "enabled": true,
+    "required": false,
+    "sort_order": 4,
+    "placeholder": "例: 198円",
+    "description": "値札や商品画像に含まれる価格を想定します。",
+    "created_at": "2026-04-02T00:00:00Z",
+    "updated_at": "2026-04-02T00:00:00Z"
+  },
+  {
+    "field_id": "field_summary",
+    "key": "summary",
+    "label": "商品概要",
+    "field_type": "long_text",
+    "enabled": true,
+    "required": false,
+    "sort_order": 5,
+    "placeholder": "商品特徴の要約",
+    "description": "商品画像全体から生成する説明文を想定します。",
+    "created_at": "2026-04-02T00:00:00Z",
+    "updated_at": "2026-04-02T00:00:00Z"
+  }
+]

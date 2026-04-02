@@ -7,6 +7,7 @@ from datetime import UTC
 from app.schemas.result import (
     DummyAnalysisResult,
     UploadProcessOutcome,
+    UploadResultFieldView,
     UploadResultItemView,
     UploadResultView,
 )
@@ -38,6 +39,14 @@ class ResultService:
                     dummy_label=item_result.dummy_label,
                     score=item_result.score,
                     comment=item_result.comment,
+                    extracted_fields=[
+                        UploadResultFieldView(
+                            key=field.key,
+                            label=field.label,
+                            value=field.value,
+                        )
+                        for field in item_result.extracted_fields
+                    ],
                 )
             )
 

@@ -22,6 +22,11 @@ def test_uploads_returns_partial_for_valid_images(
     assert "sample-1.png" in response.text
     assert "sample-2.jpg" in response.text
     assert "/static/uploads/" in response.text
+    assert "商品名" in response.text
+    assert "原材料" in response.text
+    assert "カロリー" in response.text
+    assert "値段" in response.text
+    assert "商品概要" in response.text
 
 
 def test_uploads_returns_error_when_no_files_selected(client: TestClient) -> None:

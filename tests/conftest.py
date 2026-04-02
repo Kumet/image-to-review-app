@@ -31,6 +31,7 @@ def settings(tmp_path: Path) -> Settings:
         app_env="test",
         debug=True,
         upload_dir=str(tmp_path / "uploads"),
+        extraction_config_path=str(tmp_path / "config" / "extraction_fields.json"),
         max_upload_files=3,
         max_file_size_mb=1,
         allowed_extensions=(".jpg", ".jpeg", ".png", ".webp"),

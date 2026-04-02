@@ -48,3 +48,8 @@ class SaveFileError(AppError):
 class AnalyzeError(AppError):
     default_message = "画像解析に失敗しました"
     default_status_code = 500
+
+
+class ConfigPersistenceError(AppError):
+    default_message = "設定の保存に失敗しました"
+    default_status_code = 500

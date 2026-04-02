@@ -21,6 +21,14 @@ def test_admin_extraction_fields_returns_200(client: TestClient) -> None:
     assert "原材料" in response.text
 
 
+def test_admin_article_templates_returns_200(client: TestClient) -> None:
+    response = client.get("/admin/article-templates")
+
+    assert response.status_code == 200
+    assert "記事テンプレート管理" in response.text
+    assert "商品紹介ブログ" in response.text
+
+
 def test_health_returns_ok(client: TestClient) -> None:
     response = client.get("/health")
 

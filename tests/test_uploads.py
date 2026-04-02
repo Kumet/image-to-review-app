@@ -27,6 +27,9 @@ def test_uploads_returns_partial_for_valid_images(
     assert "カロリー" in response.text
     assert "値段" in response.text
     assert "商品概要" in response.text
+    assert "生成記事" in response.text
+    assert "商品紹介ブログ" in response.text
+    assert "sample-1 を紹介" in response.text
 
 
 def test_uploads_returns_error_when_no_files_selected(client: TestClient) -> None:

@@ -47,7 +47,9 @@ body {
 .hero-panel h2,
 .panel h3,
 .result-card h4,
-.error-box h4 {
+.error-box h4,
+.generated-article h6,
+.generated-articles h5 {
   margin: 0 0 0.5rem;
 }
 
@@ -332,6 +334,39 @@ body {
   align-items: center;
   gap: 0.5rem;
   font-weight: 600;
+}
+
+.template-variable-panel {
+  margin-bottom: 1.25rem;
+  padding: 1rem;
+  border: 1px solid #dbeafe;
+  border-radius: 12px;
+  background: #eff6ff;
+}
+
+.generated-articles {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.generated-article {
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  background: #ffffff;
+}
+
+.generated-article__meta {
+  margin: 0 0 0.25rem;
+  color: #1d4ed8;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.generated-article__body {
+  margin: 0;
+  white-space: pre-line;
 }
 
 @media (max-width: 720px) {

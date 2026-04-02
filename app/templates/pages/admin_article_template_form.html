@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="panel">
+  <h2>{% if mode == "create" %}記事テンプレート作成{% else %}記事テンプレート編集{% endif %}</h2>
+  <p>抽出項目の値を差し込んで記事を生成するテンプレートを設定します。</p>
+
+  <div class="template-variable-panel">
+    <h3>使用可能変数</h3>
+    <ul class="selected-files">
+      {% for variable in available_variables %}
+      <li><code>{{ variable }}</code></li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <form
+    class="form-grid"
+    method="post"
+    action="{% if mode == 'create' %}/admin/article-templates{% else %}/admin/article-templates/{{ article_template.template_id }}{% endif %}"
+  >
+    <label>
+      テンプレート名
+      <input type="text" name="name" required value="{{ article_template.name if article_template else '' }}">
+    </label>
+
+    <label>
+      説明
+      <textarea name="description" rows="3">{{ article_template.description if article_template and article_template.description else '' }}</textarea>
+    </label>
+
+    <label>
+      タイトルテンプレート
+      <input type="text" name="title_template" required value="{{ article_template.title_template if article_template else '' }}">
+    </label>
+
+    <label>
+      本文テンプレート
+      <textarea name="body_template" rows="10">{{ article_template.body_template if article_template else '' }}</textarea>
+    </label>
+
+    <div class="checkbox-row">
+      <label>
+        <input type="checkbox" name="enabled" {% if not article_template or article_template.enabled %}checked{% endif %}>
+        有効
+      </label>
+    </div>
+
+    <div class="admin-toolbar">
+      <button class="primary-button" type="submit">保存</button>
+      <a class="secondary-button" href="/admin/article-templates">一覧へ戻る</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

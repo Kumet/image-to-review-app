@@ -15,6 +15,8 @@ from app.core.config import Settings, get_settings
 from app.core.exceptions import AppError
 from app.core.logging import configure_logging
 from app.routes import admin, health, pages, uploads
+from app.services.article_render_service import ArticleRenderService
+from app.services.article_template_service import ArticleTemplateService
 from app.services.dummy_analyzer import DummyAnalyzer
 from app.services.extraction_field_service import ExtractionFieldService
 from app.services.file_service import FileService
@@ -34,6 +36,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         resolved_settings.upload_dir_path.mkdir(parents=True, exist_ok=True)
         app.state.extraction_field_service.ensure_config_file()
+        app.state.article_template_service.ensure_config_file()
         yield
 
     app = FastAPI(
@@ -48,7 +51,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     extraction_field_service = ExtractionFieldService(
         resolved_settings.extraction_config_file_path
     )
-    result_service = ResultService()
+    article_template_service = ArticleTemplateService(
+        resolved_settings.article_template_config_file_path
+    )
+    article_render_service = ArticleRenderService(article_template_service)
+    result_service = ResultService(article_render_service=article_render_service)
     upload_service = UploadService(
         settings=resolved_settings,
         file_service=file_service,
@@ -60,6 +67,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.templates = templates
     app.state.file_service = file_service
     app.state.extraction_field_service = extraction_field_service
+    app.state.article_template_service = article_template_service
+    app.state.article_render_service = article_render_service
     app.state.upload_service = upload_service
 
     app.mount("/static", StaticFiles(directory=str(resolved_settings.static_dir)), name="static")

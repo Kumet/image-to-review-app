@@ -62,3 +62,31 @@ class ExtractionFieldUpdate(AppSchema):
         if value not in ALLOWED_FIELD_TYPES:
             raise ValueError("Unsupported field type.")
         return value
+
+
+class ArticleTemplateConfig(AppSchema):
+    template_id: str
+    name: str
+    description: str | None = None
+    title_template: str
+    body_template: str
+    enabled: bool = True
+    sort_order: int
+    created_at: datetime
+    updated_at: datetime
+
+
+class ArticleTemplateCreate(AppSchema):
+    name: str
+    description: str | None = None
+    title_template: str
+    body_template: str
+    enabled: bool = True
+
+
+class ArticleTemplateUpdate(AppSchema):
+    name: str
+    description: str | None = None
+    title_template: str
+    body_template: str
+    enabled: bool = True

@@ -6,16 +6,21 @@ from datetime import UTC
 
 from app.schemas.result import (
     DummyAnalysisResult,
+    GeneratedArticleView,
     UploadProcessOutcome,
     UploadResultFieldView,
     UploadResultItemView,
     UploadResultView,
 )
 from app.schemas.upload import UploadJob
+from app.services.article_render_service import ArticleRenderService
 
 
 class ResultService:
     """テンプレートで扱いやすい結果データを構築する。"""
+
+    def __init__(self, *, article_render_service: ArticleRenderService) -> None:
+        self.article_render_service = article_render_service
 
     def build_view(self, *, job: UploadJob, analysis: DummyAnalysisResult) -> UploadResultView:
         result_map = {item.filename: item for item in analysis.item_results}
@@ -46,6 +51,17 @@ class ResultService:
                             value=field.value,
                         )
                         for field in item_result.extracted_fields
+                    ],
+                    generated_articles=[
+                        GeneratedArticleView(
+                            template_id=article.template_id,
+                            template_name=article.template_name,
+                            title=article.title,
+                            body=article.body,
+                        )
+                        for article in self.article_render_service.render_articles(
+                            item_result.extracted_fields
+                        )
                     ],
                 )
             )

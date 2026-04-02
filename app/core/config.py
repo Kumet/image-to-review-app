@@ -52,6 +52,7 @@ class Settings(BaseSettings):
     enable_image_preview: bool = True
     log_level: str = "INFO"
     extraction_config_path: str = "config/extraction_fields.json"
+    article_template_config_path: str = "config/article_templates.json"
 
     @field_validator("allowed_extensions", mode="before")
     @classmethod
@@ -97,6 +98,13 @@ class Settings(BaseSettings):
     @property
     def extraction_config_file_path(self) -> Path:
         config_path = Path(self.extraction_config_path)
+        if config_path.is_absolute():
+            return config_path
+        return (PROJECT_ROOT / config_path).resolve()
+
+    @property
+    def article_template_config_file_path(self) -> Path:
+        config_path = Path(self.article_template_config_path)
         if config_path.is_absolute():
             return config_path
         return (PROJECT_ROOT / config_path).resolve()

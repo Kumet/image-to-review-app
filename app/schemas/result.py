@@ -28,6 +28,13 @@ class UploadResultFieldView(AppSchema):
     value: str
 
 
+class GeneratedArticleView(AppSchema):
+    template_id: str
+    template_name: str
+    title: str
+    body: str
+
+
 class DummyAnalysisResult(AppSchema):
     job_id: str
     summary: str
@@ -45,6 +52,7 @@ class UploadResultItemView(AppSchema):
     score: float
     comment: str
     extracted_fields: list[UploadResultFieldView]
+    generated_articles: list[GeneratedArticleView]
 
 
 class UploadResultView(AppSchema):

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="panel">
+  <div class="admin-toolbar">
+    <div>
+      <h2>記事テンプレート管理</h2>
+      <p>抽出項目を埋め込んで記事を生成するテンプレートを管理します。</p>
+    </div>
+    <a class="secondary-button" href="/admin/article-templates/new">新規テンプレートを追加</a>
+  </div>
+
+  <form class="admin-reorder-form" method="post" action="/admin/article-template-actions/reorder">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>順序</th>
+          <th>名前</th>
+          <th>状態</th>
+          <th>タイトルテンプレート</th>
+          <th>説明</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for article_template in article_templates %}
+        <tr>
+          <td>
+            <input type="hidden" name="template_ids" value="{{ article_template.template_id }}">
+            {{ article_template.sort_order }}
+          </td>
+          <td>{{ article_template.name }}</td>
+          <td>
+            <span class="status-badge{% if not article_template.enabled %} off{% endif %}">
+              {% if article_template.enabled %}有効{% else %}無効{% endif %}
+            </span>
+          </td>
+          <td><code>{{ article_template.title_template }}</code></td>
+          <td>{{ article_template.description or "-" }}</td>
+          <td class="actions">
+            <a class="link-button" href="/admin/article-templates/{{ article_template.template_id }}/edit">編集</a>
+            <button
+              class="link-button"
+              type="submit"
+              formaction="/admin/article-templates/{{ article_template.template_id }}/toggle"
+            >
+              {% if article_template.enabled %}無効化{% else %}有効化{% endif %}
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </form>
+</section>
+{% endblock %}

@@ -84,3 +84,34 @@ DEFAULT_EXTRACTION_FIELDS: tuple[dict[str, object], ...] = (
 )
 
 ALLOWED_FIELD_TYPES: tuple[str, ...] = ("text", "long_text", "number", "currency")
+
+DEFAULT_ARTICLE_TEMPLATES: tuple[dict[str, object], ...] = (
+    {
+        "template_id": "template_blog_intro",
+        "name": "商品紹介ブログ",
+        "description": "商品を紹介するシンプルなブログ向けテンプレートです。",
+        "title_template": "{product_name} を紹介",
+        "body_template": (
+            "今回紹介するのは {product_name} です。\n\n"
+            "原材料は {ingredients}。\n"
+            "カロリーは {calories}、価格は {price} です。\n\n"
+            "商品概要:\n{summary}\n\n"
+            "気になった方はぜひチェックしてみてください。"
+        ),
+        "enabled": True,
+        "sort_order": 1,
+    },
+    {
+        "template_id": "template_short_review",
+        "name": "レビュー風テンプレート",
+        "description": "商品特徴を短くまとめるレビュー向けテンプレートです。",
+        "title_template": "{product_name} の簡単レビュー",
+        "body_template": (
+            "{product_name} は {summary}\n"
+            "原材料は {ingredients}。\n"
+            "カロリーは {calories}、価格は {price} でした。"
+        ),
+        "enabled": True,
+        "sort_order": 2,
+    },
+)

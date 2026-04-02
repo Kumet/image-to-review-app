@@ -35,5 +35,17 @@
       </div>
       {% endfor %}
     </dl>
+    {% if item.generated_articles %}
+    <section class="generated-articles">
+      <h5>生成記事</h5>
+      {% for article in item.generated_articles %}
+      <article class="generated-article">
+        <p class="generated-article__meta">{{ article.template_name }}</p>
+        <h6>{{ article.title }}</h6>
+        <p class="generated-article__body">{{ article.body }}</p>
+      </article>
+      {% endfor %}
+    </section>
+    {% endif %}
   </div>
 </article>

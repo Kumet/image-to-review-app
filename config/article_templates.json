@@ -1,0 +1,24 @@
+[
+  {
+    "template_id": "template_blog_intro",
+    "name": "商品紹介ブログ",
+    "description": "商品を紹介するシンプルなブログ向けテンプレートです。",
+    "title_template": "{product_name} を紹介",
+    "body_template": "今回紹介するのは {product_name} です。\n\n原材料は {ingredients}。\nカロリーは {calories}、価格は {price} です。\n\n商品概要:\n{summary}\n\n気になった方はぜひチェックしてみてください。",
+    "enabled": true,
+    "sort_order": 1,
+    "created_at": "2026-04-02T00:00:00Z",
+    "updated_at": "2026-04-02T00:00:00Z"
+  },
+  {
+    "template_id": "template_short_review",
+    "name": "レビュー風テンプレート",
+    "description": "商品特徴を短くまとめるレビュー向けテンプレートです。",
+    "title_template": "{product_name} の簡単レビュー",
+    "body_template": "{product_name} は {summary}\n原材料は {ingredients}。\nカロリーは {calories}、価格は {price} でした。",
+    "enabled": true,
+    "sort_order": 2,
+    "created_at": "2026-04-02T00:00:00Z",
+    "updated_at": "2026-04-02T00:00:00Z"
+  }
+]
